@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>杭州电子科技大学70周年校庆问卷调查</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --primary: #6366f1;
+    --primary-soft: #eef2ff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(900px 500px at 10% -10%, #e0e7ff 0%, transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, #fce7f3 0%, transparent 55%),
+      #f8fafc;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 48px 16px 96px;
+  }
+  #app { max-width: 680px; margin: 0 auto; }
+
+  .card {
+    background: #fff;
+    border-radius: 22px;
+    padding: 36px 34px 30px;
+    box-shadow: 0 24px 60px -28px rgba(15, 23, 42, .35),
+                0 2px 8px rgba(15, 23, 42, .04);
+  }
+  .page-enter { animation: fadeUp .35s cubic-bezier(.4, 0, .2, 1); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .card-head h1 { font-size: 22px; margin: 0 0 8px; letter-spacing: -.01em; }
+  .card-head p  { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+  .progress-wrap { margin: 24px 0 4px; }
+  .progress-text {
+    display: flex; justify-content: space-between;
+    font-size: 12.5px; font-weight: 500; color: var(--muted); margin-bottom: 8px;
+  }
+  .progress { height: 8px; background: #eef2f7; border-radius: 99px; overflow: hidden; }
+  .progress .bar {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    transition: width .45s cubic-bezier(.4, 0, .2, 1);
+  }
+
+  .questions { margin-top: 14px; }
+  .question { padding: 22px 0; border-top: 1px solid #f1f5f9; }
+  .question:first-child { border-top: 0; }
+  .q-title { font-size: 16px; font-weight: 600; line-height: 1.5; margin-bottom: 14px; }
+  .req { color: var(--danger); margin-left: 4px; }
+  .q-hint { font-size: 13px; color: var(--muted); margin: -8px 0 12px; }
+  .q-error { color: var(--danger); font-size: 13px; margin-top: 10px; }
+  .question.error .q-title { color: var(--danger); }
+  .question.error { animation: shake .45s; }
+  @keyframes shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    position: relative; display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: #fff;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    cursor: pointer; user-select: none;
+    transition: border-color .18s, background .18s, transform .18s;
+  }
+  .option:hover { border-color: #c7d2fe; background: #fafbff; }
+  .option:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+  .option input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .option-text { font-size: 14.5px; line-height: 1.4; }
+  .mark {
+    flex: 0 0 auto; width: 20px; height: 20px; position: relative;
+    border: 2px solid #cbd5e1; border-radius: 50%;
+    background: #fff; transition: .18s;
+  }
+  .mark.square { border-radius: 6px; }
+  .option input:checked ~ .mark { border-color: var(--primary); }
+  .option input:checked ~ .mark::after {
+    content: ''; position: absolute; inset: 3px;
+    background: var(--primary); border-radius: 50%;
+  }
+  .option input:checked ~ .mark.square::after {
+    content: '✓'; inset: 0; border-radius: 5px; background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 12px; font-weight: 700;
+  }
+
+  .rating { display: flex; gap: 6px; }
+  .star {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-size: 36px; line-height: 1; color: #e2e8f0;
+    transition: color .15s, transform .15s;
+  }
+  .star.on { color: #fbbf24; }
+  .star:hover { transform: scale(1.12); }
+  .rating-labels {
+    display: flex; justify-content: space-between;
+    max-width: 260px; margin-top: 8px;
+    font-size: 12px; color: var(--muted);
+  }
+
+  .nps { display: flex; flex-wrap: wrap; gap: 8px; }
+  .nps-btn {
+    width: 46px; height: 46px; border-radius: 12px;
+    border: 1.5px solid var(--border); background: #fff;
+    font-size: 15px; font-weight: 600; color: #475569;
+    cursor: pointer; font-family: inherit; transition: .18s;
+  }
+  .nps-btn:hover { border-color: #c7d2fe; color: var(--primary); }
+  .nps-btn.on {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-color: transparent; color: #fff;
+    box-shadow: 0 8px 16px -8px rgba(99, 102, 241, .9);
+  }
+
+  .text-input {
+    width: 100%; min-height: 110px; resize: vertical;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; font-size: 14px; line-height: 1.6;
+    font-family: inherit; color: var(--text);
+    outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  .text-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
+  }
+  .counter { text-align: right; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 26px; }
+  .nav.center { justify-content: center; }
+  .btn {
+    border: 0; border-radius: 12px; padding: 12px 26px;
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: .2s;
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; box-shadow: 0 10px 20px -8px rgba(99, 102, 241, .8);
+  }
+  .btn.primary:hover { transform: translateY(-1px); box-shadow: 0 14px 26px -8px rgba(99, 102, 241, .9); }
+  .btn.ghost { background: #f1f5f9; color: #475569; }
+  .btn.ghost:hover { background: #e2e8f0; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .footnote { text-align: center; font-size: 12px; color: #94a3b8; margin: 22px 0 0; }
+
+  .result-head { text-align: center; padding: 6px 0 22px; }
+  .check-circle {
+    width: 64px; height: 64px; margin: 0 auto 16px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: #fff; font-size: 30px;
+    box-shadow: 0 12px 24px -10px rgba(16, 185, 129, .8);
+    animation: pop .45s cubic-bezier(.34, 1.56, .64, 1);
+  }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .result-head h1 { font-size: 20px; margin: 0 0 8px; }
+  .result-head p { margin: 0; font-size: 14px; color: var(--muted); }
+
+  .result-row { padding: 14px 0; border-bottom: 1px dashed #e8edf5; }
+  .result-row:last-child { border-bottom: 0; }
+  .rq { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .ra { font-size: 15px; font-weight: 600; line-height: 1.5; word-break: break-word; }
+
+  .json-box {
+    margin-top: 18px; padding: 12px 16px;
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
+  }
+  .json-box summary { cursor: pointer; font-size: 13px; color: var(--muted); font-weight: 500; }
+  .json-box pre {
+    margin: 12px 0 0; max-height: 260px; overflow: auto;
+    font-size: 12px; color: #334155; line-height: 1.6;
+  }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 40px; z-index: 99;
+    transform: translate(-50%, 20px);
+    background: #1e293b; color: #fff;
+    padding: 10px 18px; border-radius: 10px; font-size: 14px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s, transform .3s;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 520px) {
+    body { padding: 20px 12px 60px; }
+    .card { padding: 26px 20px 22px; border-radius: 18px; }
+    .card-head h1 { font-size: 19px; }
+    .star { font-size: 32px; }
+    .nps-btn { width: 40px; height: 40px; }
+    .btn { padding: 12px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const SURVEY = {
+  title: '杭州电子科技大学70周年校庆问卷调查',
+  subtitle: '你的反馈会帮助我们做得更好，预计用时 2 分钟。',
+  perPage: 2,
+  questions: [
+    {
+      id: 'q1',
+      type: 'radio',
+      title: '杭州电子科技大学建校时间是？',
+      required: true,
+      options: ['1956年', '1958年', '1960年', '1962年']
+    },
+    {
+      id: 'q2',
+      type: 'radio',
+      title: '杭州电子科技大学的校训是什么？',
+      required: true,
+      options: [
+        '笃学力行、守正求新',
+        '求真务实、开拓创新',
+        '厚德博学、笃行致远',
+        '自强不息、追求卓越'
+      ]
+    },
+    {
+      id: 'q3',
+      type: 'radio',
+      title: '杭电有几个校区？',
+      required: true,
+      options: ['3个', '4个', '5个', '6个']
+    },
+    {
+      id: 'q4',
+      type: 'radio',
+      title: '杭电何时改名为杭州电子科技大学？',
+      required: true,
+      options: ['2000年', '2002年', '2004年', '2006年']
+    },
+    {
+      id: 'q5',
+      type: 'radio',
+      title: '杭电哪一年升格为本科院校的？',
+      required: true,
+      options: ['1978年', '1980年', '1982年', '1984年']
+    },
+    {
+      id: 'q6',
+      type: 'radio',
+      title: '我校下沙校区南大门的美称是？',
+      required: true,
+      options: ['长虹揽月', '扬帆启航', '雅湖云影', '三省问天']
+    }
+  ]
+};
+
+function el(tag, cls, text) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+function isEmpty(v) {
+  return v === undefined || v === null || v === '' ||
+         (Array.isArray(v) && v.length === 0);
+}
+let toastTimer;
+function toast(msg) {
+  let t = document.querySelector('.toast');
+  if (!t) { t = el('div', 'toast'); document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+const app = document.getElementById('app');
+let page = 0;
+let answers = {};
+let startTime = Date.now();
+
+const totalPages = Math.ceil(SURVEY.questions.length / SURVEY.perPage);
+const pages = [];
+for (let i = 0; i < SURVEY.questions.length; i += SURVEY.perPage) {
+  pages.push(SURVEY.questions.slice(i, i + SURVEY.perPage));
+}
+
+function renderQuestion(q) {
+  const box = el('div', 'question');
+  box.dataset.qid = q.id;
+
+  const title = el('div', 'q-title');
+  title.innerHTML = escapeHtml(q.title) +
+    (q.required ? '<span class="req">*</span>' : '');
+  box.appendChild(title);
+
+  if (q.hint) box.appendChild(el('div', 'q-hint', q.hint));
+
+  const onChange = () => clearError(box);
+
+  if (q.type === 'radio') {
+    const group = el('div', 'options');
+    q.options.forEach(opt => {
+      const label = el('label', 'option');
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = q.id;
+      input.value = opt;
+      input.checked = answers[q.id] === opt;
+      input.addEventListener('change', () => {
+        answers[q.id] = opt;
+        onChange();
+      });
+      label.append(input, el('span', 'mark'), el('span', 'option-text', opt));
+      group.appendChild(label);
+    });
+    box.appendChild(group);
+  }
+
+  if (q.type === 'checkbox') {
+    const group = el('div', 'options');
+    const current = answers[q.id] || [];
+    q.options.forEach(opt => {
+      const label = el('label', 'option');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = opt;
+      input.checked = current.includes(opt);
+      input.addEventListener('change', () => {
+        let arr = answers[q.id] ? [...answers[q.id]] : [];
+        if (input.checked) {
+          if (q.max && arr.length >= q.max) {
+            input.checked = false;
+            toast(`最多只能选择 ${q.max} 项`);
+            return;
+          }
+          arr.push(opt);
+        } else {
+          arr = arr.filter(x => x !== opt);
+        }
+        answers[q.id] = arr;
+        onChange();
+      });
+      label.append(input, el('span', 'mark square'), el('span', 'option-text', opt));
+      group.appendChild(label);
+    });
+    box.appendChild(group);
+  }
+
+  if (q.type === 'rating') {
+    const wrap = el('div', 'rating');
+    const paint = val => {
+      [...wrap.querySelectorAll('.star')].forEach(s => {
+        s.classList.toggle('on', Number(s.dataset.value) <= val);
+      });
+    };
+    for (let i = 1; i <= q.max; i++) {
+      const star = el('button', 'star', '★');
+      star.type = 'button';
+      star.dataset.value = i;
+      star.setAttribute('aria-label', `${i} 分`);
+      star.addEventListener('click', () => {
+        answers[q.id] = i;
+        paint(i);
+        onChange();
+      });
+      star.addEventListener('mouseenter', () => paint(i));
+      wrap.appendChild(star);
+    }
+    wrap.addEventListener('mouseleave', () => paint(answers[q.id] || 0));
+    paint(answers[q.id] || 0);
+    box.appendChild(wrap);
+
+    if (q.lowLabel || q.highLabel) {
+      const labels = el('div', 'rating-labels');
+      labels.innerHTML =
+        `<span>${escapeHtml(q.lowLabel || '')}</span>` +
+        `<span>${escapeHtml(q.highLabel || '')}</span>`;
+      box.appendChild(labels);
+    }
+  }
+
+  if (q.type === 'nps') {
+    const wrap = el('div', 'nps');
+    for (let i = q.min; i <= q.max; i++) {
+      const b = el('button', 'nps-btn', String(i));
+      b.type = 'button';
+      if (answers[q.id] === i) b.classList.add('on');
+      b.addEventListener('click', () => {
+        answers[q.id] = i;
+        [...wrap.children].forEach(c => c.classList.toggle('on', c === b));
+        onChange();
+      });
+      wrap.appendChild(b);
+    }
+    box.appendChild(wrap);
+  }
+
+  if (q.type === 'text') {
+    const ta = document.createElement('textarea');
+    ta.className = 'text-input';
+    ta.placeholder = q.placeholder || '';
+    ta.value = answers[q.id] || '';
+    if (q.maxLength) ta.maxLength = q.maxLength;
+
+    const counter = el('div', 'counter',
+      `${ta.value.length} / ${q.maxLength || '∞'}`);
+
+    ta.addEventListener('input', () => {
+      answers[q.id] = ta.value;
+      counter.textContent = `${ta.value.length} / ${q.maxLength || '∞'}`;
+      onChange();
+    });
+
+    box.append(ta, counter);
+  }
+
+  return box;
+}
+
+function showError(box, msg) {
+  box.classList.add('error');
+  box.appendChild(el('div', 'q-error', msg));
+}
+function clearError(box) {
+  box.classList.remove('error');
+  const e = box.querySelector('.q-error');
+  if (e) e.remove();
+}
+function validatePage() {
+  let firstError = null;
+  pages[page].forEach(q => {
+    const box = document.querySelector(`.question[data-qid="${q.id}"]`);
+    if (!box) return;
+    clearError(box);
+
+    const v = answers[q.id];
+    if (q.required && isEmpty(v)) {
+      showError(box, '这一题是必填的哦～');
+      firstError = firstError || box;
+    } else if (q.type === 'checkbox' && q.min && Array.isArray(v) && v.length < q.min) {
+      showError(box, `请至少选择 ${q.min} 项`);
+      firstError = firstError || box;
+    }
+  });
+  if (firstError) {
+    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+  return true;
+}
+
+function render() {
+  const pct = Math.round(((page + 1) / totalPages) * 100);
+
+  app.innerHTML = `
+    <div class="card page-enter">
+      <div class="card-head">
+        <h1>${escapeHtml(SURVEY.title)}</h1>
+        <p>${escapeHtml(SURVEY.subtitle)}</p>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-text">
+          <span>第 ${page + 1} / ${totalPages} 页</span>
+          <span>${pct}%</span>
+        </div>
+        <div class="progress"><div class="bar" style="width:${pct}%"></div></div>
+      </div>
+
+      <div class="questions" id="questions"></div>
+
+      <div class="nav">
+        <button class="btn ghost" id="prevBtn" ${page === 0 ? 'disabled' : ''}>上一步</button>
+        <button class="btn primary" id="nextBtn">
+          ${page === totalPages - 1 ? '提交问卷' : '下一步'}
+        </button>
+      </div>
+
+      <p class="footnote">🔒 你的回答仅用于校庆活动统计，不会泄露个人信息</p>
+    </div>
+  `;
+
+  const qWrap = document.getElementById('questions');
+  pages[page].forEach(q => qWrap.appendChild(renderQuestion(q)));
+
+  document.getElementById('prevBtn').onclick = () => {
+    if (page > 0) { page--; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  };
+  document.getElementById('nextBtn').onclick = () => {
+    if (!validatePage()) return;
+    if (page < totalPages - 1) {
+      page++;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      submit();
+    }
+  };
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function submit() {
+  const payload = {
+    survey: SURVEY.title,
+    submittedAt: new Date().toISOString(),
+    durationSec: Math.round((Date.now() - startTime) / 1000),
+    answers: SURVEY.questions.map(q => ({
+      id: q.id,
+      title: q.title,
+      answer: answers[q.id] !== undefined ? answers[q.id] : null
+    }))
+  };
+
+  localStorage.setItem('survey_result', JSON.stringify(payload));
+  console.log('✅ 问卷提交数据：', payload);
+
+  renderResult(payload);
+}
+
+function renderResult(payload) {
+  const rows = payload.answers.map((a, i) => {
+    const q = SURVEY.questions[i];
+    let val = a.answer;
+
+    if (isEmpty(val)) {
+      val = '未填写';
+    } else if (Array.isArray(val)) {
+      val = val.join('、');
+    } else if (q.type === 'rating') {
+      val = '★'.repeat(a.answer) + '☆'.repeat(q.max - a.answer) + `（${a.answer} / ${q.max}）`;
+    } else {
+      val = String(val);
+    }
+
+    return `<div class="result-row">
+              <div class="rq">${escapeHtml(q.title)}</div>
+              <div class="ra">${escapeHtml(val)}</div>
+            </div>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="card page-enter">
+      <div class="result-head">
+        <div class="check-circle">✓</div>
+        <h1>提交成功，感谢你的反馈！</h1>
+        <p>我们已收到你的回答（用时 ${payload.durationSec} 秒）</p>
+      </div>
+
+      <div class="result-list">${rows}</div>
+
+      <details class="json-box">
+        <summary>查看提交的数据（JSON）</summary>
+        <pre>${escapeHtml(JSON.stringify(payload, null, 2))}</pre>
+      </details>
+
+      <div class="nav center">
+        <button class="btn primary" id="againBtn">重新填写</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('againBtn').onclick = () => {
+    answers = {};
+    page = 0;
+    startTime = Date.now();
+    render();
+  };
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+render();
+</script>
+</body>
+</html>
